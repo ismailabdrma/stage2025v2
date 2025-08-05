@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://supplier.com/ws" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://supplier.com/ws" targetNamespace="http://supplier.com/ws">
+  <wsdl:types>
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://supplier.com/ws">
+
+    <!-- Enhanced Product Type -->
+    <xs:complexType name="product">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long"/>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="description" type="xs:string"/>
+            <xs:element name="supplierPrice" type="xs:double"/>
+            <xs:element name="displayedPrice" type="xs:double"/>
+            <xs:element name="availableQuantity" type="xs:int"/>
+            <xs:element minOccurs="0" name="pictureUrl" type="xs:string"/>
+            <xs:element name="realTimeStock" type="xs:int"/>
+            <xs:element name="lastStockUpdate" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- === PAYMENT SOAP OPERATION === -->
+    <xs:element name="processPaymentRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="productId" type="xs:long"/>
+                <xs:element name="quantity" type="xs:int"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="processPaymentResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" name="paymentId" type="xs:long"/>
+                <xs:element name="status" type="xs:string"/>
+                <xs:element minOccurs="0" name="stripeSessionId" type="xs:string"/>
+                <xs:element minOccurs="0" name="url" type="xs:string"/>
+                <xs:element minOccurs="0" name="message" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Get Product By ID -->
+    <xs:element name="getProductByIdRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="id" type="xs:long"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getProductByIdResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" name="product" type="tns:product"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Get Available Stock -->
+    <xs:element name="getAvailableStockRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="productId" type="xs:long"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAvailableStockResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="quantity" type="xs:int"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Notify Payment Status -->
+    <xs:element name="notifyPaymentStatusRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="paymentId" type="xs:long"/>
+                <xs:element name="status" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="notifyPaymentStatusResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="success" type="xs:boolean"/>
+                <xs:element name="message" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Get All Products -->
+    <xs:element name="getAllProductsRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <!-- Empty request - gets all products -->
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAllProductsResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="products" type="tns:product"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="getAvailableStockRequest">
+    <wsdl:part element="tns:getAvailableStockRequest" name="getAvailableStockRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAvailableStockResponse">
+    <wsdl:part element="tns:getAvailableStockResponse" name="getAvailableStockResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="processPaymentResponse">
+    <wsdl:part element="tns:processPaymentResponse" name="processPaymentResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getProductByIdResponse">
+    <wsdl:part element="tns:getProductByIdResponse" name="getProductByIdResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAllProductsRequest">
+    <wsdl:part element="tns:getAllProductsRequest" name="getAllProductsRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="notifyPaymentStatusRequest">
+    <wsdl:part element="tns:notifyPaymentStatusRequest" name="notifyPaymentStatusRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAllProductsResponse">
+    <wsdl:part element="tns:getAllProductsResponse" name="getAllProductsResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="processPaymentRequest">
+    <wsdl:part element="tns:processPaymentRequest" name="processPaymentRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getProductByIdRequest">
+    <wsdl:part element="tns:getProductByIdRequest" name="getProductByIdRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="notifyPaymentStatusResponse">
+    <wsdl:part element="tns:notifyPaymentStatusResponse" name="notifyPaymentStatusResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="SupplierPort">
+    <wsdl:operation name="getAvailableStock">
+      <wsdl:input message="tns:getAvailableStockRequest" name="getAvailableStockRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:getAvailableStockResponse" name="getAvailableStockResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="processPayment">
+      <wsdl:input message="tns:processPaymentRequest" name="processPaymentRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:processPaymentResponse" name="processPaymentResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getProductById">
+      <wsdl:input message="tns:getProductByIdRequest" name="getProductByIdRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:getProductByIdResponse" name="getProductByIdResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAllProducts">
+      <wsdl:input message="tns:getAllProductsRequest" name="getAllProductsRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:getAllProductsResponse" name="getAllProductsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="notifyPaymentStatus">
+      <wsdl:input message="tns:notifyPaymentStatusRequest" name="notifyPaymentStatusRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:notifyPaymentStatusResponse" name="notifyPaymentStatusResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="SupplierPortSoap11" type="tns:SupplierPort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getAvailableStock">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="getAvailableStockRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getAvailableStockResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="processPayment">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="processPaymentRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="processPaymentResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getProductById">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="getProductByIdRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getProductByIdResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAllProducts">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="getAllProductsRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getAllProductsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="notifyPaymentStatus">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="notifyPaymentStatusRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="notifyPaymentStatusResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="SupplierPortService">
+    <wsdl:port binding="tns:SupplierPortSoap11" name="SupplierPortSoap11">
+      <soap:address location="http://localhost:8082/ws"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

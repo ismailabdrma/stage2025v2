@@ -1,0 +1,43 @@
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title>Verify Email</mat-card-title>
+      <mat-card-subtitle>Enter the verification code sent to your email</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="verifyForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" required>
+          <mat-error *ngIf="verifyForm.get('email')?.hasError('required')">
+            Email is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Verification Code</mat-label>
+          <input matInput formControlName="otp" maxlength="6" required>
+          <mat-error *ngIf="verifyForm.get('otp')?.hasError('required')">
+            Verification code is required
+          </mat-error>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" 
+                class="full-width" [disabled]="verifyForm.invalid || (loading$ | async)">
+          <mat-spinner diameter="20" *ngIf="loading$ | async"></mat-spinner>
+          <span *ngIf="!(loading$ | async)">Verify Email</span>
+        </button>
+
+        <button mat-button type="button" (click)="resendCode()" 
+                class="full-width" [disabled]="loading$ | async">
+          Resend Verification Code
+        </button>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <a mat-button routerLink="/auth/login">Back to Login</a>
+    </mat-card-actions>
+  </mat-card>
+</div>
