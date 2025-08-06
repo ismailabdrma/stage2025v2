@@ -73,7 +73,6 @@ public class ProductServiceImpl implements ProductService {
         product.setExternalProductId(dto.getExternalProductId());
         product.setImageUrls(dto.getImageUrls());
 
-        // Optionnel : mise à jour des relations
         Category category = categoryRepository.findByName(dto.getCategoryName())
                 .orElseThrow(() -> new ResourceNotFoundException("Catégorie non trouvée : " + dto.getCategoryName()));
         Supplier supplier = supplierRepository.findByName(dto.getSupplierName())
@@ -100,6 +99,27 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findByCategory(category)
                 .stream()
                 .map(ProductMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductDto> getProductsBySupplierName(String supplierName) {
+        Supplier supplier = supplierRepository.findByName(supplierName)
+                .orElseThrow(() -> new ResourceNotFoundException("Fournisseur non trouvé : " + supplierName));
+        return productRepository.findBySupplier(supplier)
+                .stream()
+                .map(ProductMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductDto> getProductsByCategoryAndSupplier(String categoryName, String supplierName) {
+        Category category = categoryRepository.findByName(categoryName)
+                .orElseThrow(() -> new ResourceNotFoundException("Catégorie non trouvée : " + categoryName));
+        Supplier supplier = supplierRepository.findByName(supplierName)
+                .orElseThrow(() -> new ResourceNotFoundException("Fournisseur non trouvé : " + supplierName));
+        return productRepository.findByCategoryAndSupplier(category, supplier)
+                .stream().map(ProductMapper::toDto)
                 .collect(Collectors.toList());
     }
 }

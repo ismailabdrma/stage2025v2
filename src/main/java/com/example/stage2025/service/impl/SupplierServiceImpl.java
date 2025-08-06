@@ -4,15 +4,19 @@ import com.example.stage2025.dto.SupplierDto;
 import com.example.stage2025.entity.ApiSupplier;
 import com.example.stage2025.entity.ExcelSupplier;
 import com.example.stage2025.entity.SoapSupplier;
+import com.example.stage2025.entity.SoapSupplierOperationMeta;
 import com.example.stage2025.entity.Supplier;
 import com.example.stage2025.exception.ResourceNotFoundException;
 import com.example.stage2025.mapper.SupplierMapper;
+import com.example.stage2025.repository.SoapSupplierOperationMetaRepository;
 import com.example.stage2025.repository.SupplierRepository;
 import com.example.stage2025.service.SupplierService;
+import com.example.stage2025.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +25,7 @@ import java.util.stream.Collectors;
 public class SupplierServiceImpl implements SupplierService {
 
     private final SupplierRepository supplierRepository;
+    private final SoapSupplierOperationMetaRepository operationMetaRepository;
 
     @Override
     public List<SupplierDto> getAllSuppliers() {
@@ -67,14 +72,41 @@ public class SupplierServiceImpl implements SupplierService {
             soapSupplier.setCreated(LocalDateTime.now());
             soapSupplier.setWsdlUrl(dto.getWsdlUrl());
             soapSupplier.setNamespace(dto.getNamespace());
-            soapSupplier.setOperation(dto.getOperation());
+            soapSupplier.setUsername(dto.getUsername());
+            soapSupplier.setPassword(dto.getPassword());
+            soapSupplier.setOperations(new ArrayList<>()); // Will populate later
             supplier = soapSupplier;
 
         } else {
             throw new IllegalArgumentException("Unknown supplier type: " + dto.getType());
         }
 
-        return SupplierMapper.toDto(supplierRepository.save(supplier));
+        // Save supplier (must be saved before adding operations)
+        Supplier saved = supplierRepository.save(supplier);
+
+        // ---- Only for SOAP suppliers: Add operation metadata if provided ----
+        if (saved instanceof SoapSupplier && dto.getOperationsMeta() != null) {
+            SoapSupplier soap = (SoapSupplier) saved;
+            List<SoapSupplierOperationMeta> ops = dto.getOperationsMeta().stream()
+                    .map(metaDto -> {
+                        SoapSupplierOperationMeta op = new SoapSupplierOperationMeta();
+                        op.setOperationName(metaDto.getOperationName());
+                        op.setInputElement(metaDto.getInputElement());
+                        op.setOutputElement(metaDto.getOutputElement());
+                        op.setSoapAction(metaDto.getSoapAction());
+                        op.setInputFieldsJson(JsonUtils.toJson(metaDto.getInputFields()));
+                        op.setOutputFieldsJson(JsonUtils.toJson(metaDto.getOutputFields()));
+
+                        op.setSupplier(soap);
+                        return op;
+                    })
+                    .collect(Collectors.toList());
+            operationMetaRepository.saveAll(ops);
+            soap.setOperations(ops);
+            supplierRepository.save(soap); // Update supplier with ops
+        }
+
+        return SupplierMapper.toDto(supplierRepository.save(saved));
     }
 
     @Override
@@ -99,7 +131,32 @@ public class SupplierServiceImpl implements SupplierService {
         } else if (supplier instanceof SoapSupplier && "SOAP".equalsIgnoreCase(dto.getType())) {
             SoapSupplier soap = (SoapSupplier) supplier;
             soap.setWsdlUrl(dto.getWsdlUrl());
-            soap.setOperation(dto.getOperation());
+            soap.setNamespace(dto.getNamespace());
+            soap.setUsername(dto.getUsername());
+            soap.setPassword(dto.getPassword());
+
+            // (Optional) Update operations meta as well
+            if (dto.getOperationsMeta() != null) {
+                // Remove old
+                operationMetaRepository.deleteAll(soap.getOperations());
+                // Add new
+                List<SoapSupplierOperationMeta> ops = dto.getOperationsMeta().stream()
+                        .map(metaDto -> {
+                            SoapSupplierOperationMeta op = new SoapSupplierOperationMeta();
+                            op.setOperationName(metaDto.getOperationName());
+                            op.setInputElement(metaDto.getInputElement());
+                            op.setOutputElement(metaDto.getOutputElement());
+                            op.setSoapAction(metaDto.getSoapAction());
+                            op.setInputFieldsJson(JsonUtils.toJson(metaDto.getInputFields()));
+                            op.setOutputFieldsJson(JsonUtils.toJson(metaDto.getOutputFields()));
+
+                            op.setSupplier(soap);
+                            return op;
+                        })
+                        .collect(Collectors.toList());
+                operationMetaRepository.saveAll(ops);
+                soap.setOperations(ops);
+            }
         }
 
         return SupplierMapper.toDto(supplierRepository.save(supplier));

@@ -11,7 +11,6 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
-    // Should be at least 32 characters (for HS256)
     private final String jwtSecret = "MySuperSecretKeyForJWTsMySuperSecretKeyForJWTs";
     private final long jwtExpirationMs = 86400000; // 1 day
 
@@ -23,6 +22,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .claim("role", user.getRole().name())
+                .claim("userId", user.getId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -30,23 +30,30 @@ public class JwtUtils {
     }
 
     public String getUsername(String token) {
+        return getClaims(token).getSubject();
+    }
+
+    public Long getUserId(String token) {
+        Object id = getClaims(token).get("userId");
+        if (id instanceof Integer) return ((Integer) id).longValue();
+        if (id instanceof Long) return (Long) id;
+        if (id instanceof String) return Long.valueOf((String) id);
+        return null;
+    }
+
+    public Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+                .getBody();
     }
 
     public boolean validate(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token);
+            getClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            // Log if you want (but avoid leaking details in prod)
             return false;
         }
     }

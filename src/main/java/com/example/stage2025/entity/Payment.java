@@ -33,4 +33,8 @@ public class Payment {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
+
 }

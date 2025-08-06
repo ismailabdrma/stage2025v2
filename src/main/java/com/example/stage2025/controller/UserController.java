@@ -5,12 +5,11 @@ import com.example.stage2025.entity.User;
 import com.example.stage2025.enums.Role;
 import com.example.stage2025.mapper.UserMapper;
 import com.example.stage2025.repository.UserRepository;
+import com.example.stage2025.security.JwtUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +23,7 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
     // Get all users (ADMIN ONLY)
     @GetMapping
@@ -44,25 +44,28 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Get current user's profile (SELF)
+    // Get current user's profile (SELF, JWT)
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserDto> getMyProfile(@AuthenticationPrincipal UserDetails userDetails) {
-        Optional<User> user = userRepository.findByUsernameOrEmail(
-                userDetails.getUsername(), userDetails.getUsername());
-        return user.map(u -> ResponseEntity.ok(UserMapper.toDto(u)))
+    public ResponseEntity<UserDto> getMyProfile(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        Long userId = jwtUtils.getUserId(token);
+        return userRepository.findById(userId)
+                .map(UserMapper::toDto)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Update current user's profile (SELF)
+    // Update current user's profile (SELF, JWT)
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDto> updateMyProfile(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestHeader("Authorization") String authHeader,
             @Valid @RequestBody UpdateProfileRequest req
     ) {
-        Optional<User> userOpt = userRepository.findByUsernameOrEmail(
-                userDetails.getUsername(), userDetails.getUsername());
+        String token = authHeader.replace("Bearer ", "");
+        Long userId = jwtUtils.getUserId(token);
+        Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
         User user = userOpt.get();
         user.setFirstName(req.firstName());
@@ -72,18 +75,18 @@ public class UserController {
         return ResponseEntity.ok(UserMapper.toDto(user));
     }
 
-    // Change password (SELF)
+    // Change password (SELF, JWT)
     @PutMapping("/me/change-password")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> changePassword(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestHeader("Authorization") String authHeader,
             @RequestBody ChangePasswordRequest req
     ) {
-        Optional<User> userOpt = userRepository.findByUsernameOrEmail(
-                userDetails.getUsername(), userDetails.getUsername());
+        String token = authHeader.replace("Bearer ", "");
+        Long userId = jwtUtils.getUserId(token);
+        Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
         User user = userOpt.get();
-        // Always hash the password!
         user.setPassword(passwordEncoder.encode(req.newPassword()));
         userRepository.save(user);
         return ResponseEntity.ok("Password updated");

@@ -10,5 +10,10 @@ public interface ProductService {
     ProductDto createProduct(ProductDto dto);
     ProductDto updateProduct(Long id, ProductDto dto);
     void deleteProduct(Long id);
+
+    // Service Interface
     List<ProductDto> getProductsByCategoryName(String categoryName);
+    List<ProductDto> getProductsBySupplierName(String supplierName);
+    List<ProductDto> getProductsByCategoryAndSupplier(String categoryName, String supplierName);
+
 }

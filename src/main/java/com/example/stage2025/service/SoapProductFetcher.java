@@ -12,8 +12,7 @@ import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,33 +23,33 @@ public class SoapProductFetcher implements ProductFetcher {
         if (!(supplier instanceof SoapSupplier soap)) {
             throw new IllegalArgumentException("Supplier is not SOAP based");
         }
+        String opName = soap.getOperations().stream()
+                .filter(op -> op.getOperationName().equalsIgnoreCase("getAllProducts")
+                        || op.getOperationName().equalsIgnoreCase("FETCH_PRODUCTS"))
+                .map(op -> op.getOperationName())
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No suitable SOAP operation for fetching products"));
 
-        // 1. Build the SOAP request message (adjust as per your WSDL)
         MessageFactory factory = MessageFactory.newInstance();
         SOAPMessage request = factory.createMessage();
         SOAPPart part = request.getSOAPPart();
         SOAPEnvelope envelope = part.getEnvelope();
         SOAPBody body = envelope.getBody();
-        // Build operation call - adjust operation and namespace for your supplier!
+
         SOAPBodyElement bodyElement = body.addBodyElement(
-                envelope.createName(soap.getOperation(), "ws", soap.getNamespace())
+                envelope.createName(opName, "ws", soap.getNamespace())
         );
-        // If you need to pass parameters, do it here:
-        // bodyElement.addChildElement("paramName").addTextNode("paramValue");
 
         request.saveChanges();
 
-        // 2. Send the SOAP request and receive the response
         SOAPConnection conn = SOAPConnectionFactory.newInstance().createConnection();
         SOAPMessage response = conn.call(request, soap.getWsdlUrl());
         conn.close();
 
-        // 3. Convert SOAP response to XML string
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         response.writeTo(out);
         String xml = out.toString();
 
-        // 4. Parse the response XML
         List<SupplierProductDto> result = new ArrayList<>();
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
                 .parse(new ByteArrayInputStream(xml.getBytes()));
@@ -63,12 +62,10 @@ public class SoapProductFetcher implements ProductFetcher {
             double price = Double.parseDouble(getTag(p, "displayedPrice"));
             int stock = Integer.parseInt(getTag(p, "availableQuantity"));
             String imageUrl = getTag(p, "pictureUrl");
-            // Adapt this to your SupplierProductDto constructor
             result.add(new SupplierProductDto(
                     id, name, description, price, stock, List.of(imageUrl)
             ));
         }
-
         return result;
     }
 

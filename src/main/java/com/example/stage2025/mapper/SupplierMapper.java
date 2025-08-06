@@ -1,8 +1,9 @@
 // src/main/java/com/example/stage2025/mapper/SupplierMapper.java
 package com.example.stage2025.mapper;
 
-import com.example.stage2025.dto.SupplierDto;
+import com.example.stage2025.dto.*;
 import com.example.stage2025.entity.*;
+import java.util.stream.Collectors;
 
 public class SupplierMapper {
 
@@ -27,15 +28,29 @@ public class SupplierMapper {
         } else if (supplier instanceof SoapSupplier soap) {
             dto.setType("SOAP");
             dto.setWsdlUrl(soap.getWsdlUrl());
-            dto.setOperation(soap.getOperation());
             dto.setNamespace(soap.getNamespace());
             dto.setUsername(soap.getUsername());
             dto.setPassword(soap.getPassword());
+            // Map dynamic SOAP ops
+            if (soap.getOperations() != null) {
+                dto.setOperationsMeta(
+                        soap.getOperations().stream().map(SupplierMapper::toDto).collect(Collectors.toList())
+                );
+            }
         } else {
             dto.setType("BASE");
         }
         return dto;
     }
 
-    // You can add toEntity methods as needed
+    public static SoapOperationMeta toDto(SoapSupplierOperationMeta op) {
+        return new SoapOperationMeta(
+                op.getOperationName(),
+                op.getSoapAction(),
+                op.getInputElement(),
+                op.getOutputElement(),
+                com.example.stage2025.dto.SoapFieldDto.fromJson(op.getInputFieldsJson()),
+                com.example.stage2025.dto.SoapFieldDto.fromJson(op.getOutputFieldsJson())
+        );
+    }
 }

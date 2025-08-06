@@ -9,4 +9,6 @@ public interface PaymentService {
     PaymentDto getPaymentById(Long id);
     List<PaymentDto> getAllPayments();
     PaymentDto updatePaymentStatus(Long id, String status);
+    void updatePaymentStatusByTransactionRef(String transactionRef, String status);
+
 }

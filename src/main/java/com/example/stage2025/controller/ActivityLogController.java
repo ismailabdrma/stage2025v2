@@ -33,8 +33,7 @@ public class ActivityLogController {
     }
 
     // 3. Get log by ID (admin only)
-    @GetMapping("/{i" +
-            "}")
+    @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActivityLogDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(activityLogService.getLogById(id));

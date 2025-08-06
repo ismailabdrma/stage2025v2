@@ -98,6 +98,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+
+        <!-- https://mvnrepository.com/artifact/com.stripe/stripe-java -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>29.4.0</version>
+        </dependency>
         <!-- WebFlux Starter (REMOVED DUPLICATE) -->
         <!-- KEEP ONLY ONE VERSION OF THIS DEPENDENCY -->
         <!-- <dependency>

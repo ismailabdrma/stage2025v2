@@ -1,3 +1,4 @@
+// src/main/java/com/example/stage2025/entity/Supplier.java
 package com.example.stage2025.entity;
 
 import com.example.stage2025.enums.PayoutFrequency;
@@ -33,7 +34,7 @@ public abstract class Supplier {
     @Enumerated(EnumType.STRING)
     private PayoutFrequency payoutFrequency = PayoutFrequency.WEEKLY;
 
-    // 👉 Add this for payment batch management!
+    // For batch payout tracking
     @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL)
     private List<SupplierPayment> payments;
 }

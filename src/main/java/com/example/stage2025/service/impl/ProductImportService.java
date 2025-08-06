@@ -32,18 +32,13 @@ public class ProductImportService {
     public void scheduledProductImport() {
         supplierRepository.findByActiveTrue().forEach(this::importProductsFromSupplier);
     }
-
+    // ProductImportService.java
     @Transactional
     public void importProductsFromSupplier(Supplier supplier) {
         log.info("Starting import for supplier: {}", supplier.getName());
 
-        if (!(supplier instanceof ApiSupplier || supplier instanceof ExcelSupplier)) {
-            log.warn("Unsupported supplier type: {}", supplier.getClass().getSimpleName());
-            return;
-        }
-
         try {
-            List<SupplierProductDto> products = fetcherFactory.fetch((ApiSupplier) supplier);
+            List<SupplierProductDto> products = fetcherFactory.fetch(supplier);
             ImportStatus status = processImportedProducts(products, supplier);
             importLogService.saveLog(
                     supplier.getId(), status, products.size(),
@@ -54,12 +49,6 @@ public class ProductImportService {
             importLogService.saveLog(
                     supplier.getId(), ImportStatus.FAILED, 0, 0, ex.getMessage());
         }
-    }
-
-    @Transactional
-    public void importProductsFromSupplier(Supplier supplier, List<SupplierProductDto> dtos) {
-        processImportedProducts(dtos, supplier);
-        importLogService.saveLog(supplier.getId(), ImportStatus.SUCCESS, dtos.size(), 0, null);
     }
 
     private ImportStatus processImportedProducts(List<SupplierProductDto> products, Supplier supplier) {
@@ -79,11 +68,10 @@ public class ProductImportService {
     }
 
     private void upsertProduct(SupplierProductDto dto, Supplier supplier) {
+        // Convert SupplierProductDto to Product entity
         Product product = productRepository
                 .findByExternalProductIdAndSupplier(dto.getExternalProductId(), supplier)
                 .orElseGet(Product::new);
-
-        boolean isNew = (product.getId() == null);
 
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
@@ -94,7 +82,7 @@ public class ProductImportService {
         product.setImageUrls(dto.getImageUrls());
         product.setSupplier(supplier);
 
-        // Ensure category
+        // Set category (default to "Uncategorized" if not found)
         if (product.getCategory() == null) {
             Category cat = categoryRepository.findByName("Uncategorized")
                     .orElseGet(() -> categoryRepository.save(
@@ -107,11 +95,11 @@ public class ProductImportService {
             product.setCategory(cat);
         }
 
-        // For new products: admin must approve (active=false)
-        if (isNew) {
+        // For new products: admin must approve
+        if (product.getId() == null) {
             product.setActive(false);
-            product.setDisplayedPrice(dto.getPrice()); // Admin can edit before approval
+            product.setDisplayedPrice(dto.getPrice());
         }
+
         productRepository.save(product);
-    }
-}
+    }}

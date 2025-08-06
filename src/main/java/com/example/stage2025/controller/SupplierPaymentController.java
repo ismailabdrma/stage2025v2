@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Handles supplier payout management (admin only).
+ */
 @RestController
 @RequestMapping("/api/supplier-payments")
 @RequiredArgsConstructor
@@ -16,28 +19,36 @@ public class SupplierPaymentController {
 
     private final SupplierPaymentService supplierPaymentService;
 
-    // 1. Get all payments (admin)
+    /**
+     * List all supplier payments (admin only)
+     */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<SupplierPaymentDto>> getAll() {
         return ResponseEntity.ok(supplierPaymentService.getAllPayments());
     }
 
-    // 2. Get payments by supplier
+    /**
+     * List payments by supplier ID (admin only)
+     */
     @GetMapping("/supplier/{supplierId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<SupplierPaymentDto>> getBySupplier(@PathVariable Long supplierId) {
         return ResponseEntity.ok(supplierPaymentService.getPaymentsBySupplierId(supplierId));
     }
 
-    // 3. Get payment by id
+    /**
+     * Get a specific supplier payment by ID (admin only)
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SupplierPaymentDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(supplierPaymentService.getPaymentById(id));
     }
 
-    // 4. Create new payment (manual payout)
+    /**
+     * Create a new manual supplier payout (admin only)
+     */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SupplierPaymentDto> create(@RequestBody SupplierPaymentDto dto) {

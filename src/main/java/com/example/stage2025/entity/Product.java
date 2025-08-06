@@ -21,6 +21,8 @@ public class Product {
     private Long id;
 
     private String name;
+    @Version
+    private Long version;
 
     @Column(length = 1000)
     private String description;

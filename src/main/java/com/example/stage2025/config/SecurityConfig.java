@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**", "/api/products/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/products/**","/api/payments/stripe-webhook").permitAll()
                         .requestMatchers("/api/admin/**","/api/suppliers/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

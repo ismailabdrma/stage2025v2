@@ -19,4 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                                        Supplier supplier);
 
   List<Product> findByActiveFalse();
+  List<Product> findByCategoryAndSupplier(Category category, Supplier supplier);
+  List<Product> findBySupplier(Supplier supplier);
+
 }
