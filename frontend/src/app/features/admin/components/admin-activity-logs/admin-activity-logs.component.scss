@@ -1,0 +1,84 @@
+scss
+/* Admin Activity Logs Styles */
+
+.admin-activity-logs-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+}
+
+.activity-logs-table {
+  width: 100%;
+}
+
+/* Optional: Add styles for specific table columns */
+.activity-logs-table th.mat-header-cell,
+.activity-logs-table td.mat-cell {
+  padding: 8px;
+}
+
+.activity-logs-table .mat-column-timestamp {
+  min-width: 150px;
+}
+
+.activity-logs-table .mat-column-user {
+  min-width: 120px;
+}
+
+.activity-logs-table .mat-column-action {
+  min-width: 150px;
+}
+
+.activity-logs-table .mat-column-details {
+  flex-grow: 1;
+}
+
+/* Filter controls styling (if implemented) */
+.filter-controls {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .activity-logs-table {
+    /* Stack table headers and data on smaller screens */
+    .mat-header-row {
+      display: none;
+    }
+
+    .mat-row {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 16px 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .mat-cell {
+      padding: 0;
+      /* Important: Stretch the cell to take full width */
+      width: 100%;
+    }
+
+    /* Optional: Add data labels before content on smaller screens */
+    .mat-column-id::before { content: 'ID: '; font-weight: bold; }
+    .mat-column-timestamp::before { content: 'Timestamp: '; font-weight: bold; }
+    .mat-column-user::before { content: 'User: '; font-weight: bold; }
+    .mat-column-action::before { content: 'Action: '; font-weight: bold; }
+    .mat-column-details::before { content: 'Details: '; font-weight: bold; }
+  }
+
+  .filter-controls {
+      flex-direction: column;
+      align-items: stretch;
+  }
+}

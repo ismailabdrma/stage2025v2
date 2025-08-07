@@ -9,9 +9,11 @@ import { MatFormFieldModule } from "@angular/material/form-field"
 import { MatInputModule } from "@angular/material/input"
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
 import { Store } from "@ngrx/store"
-import type { Observable } from "rxjs"
-import { selectUser } from "@core/store/auth/auth.selectors"
+import { Observable, tap } from "rxjs"
+import { selectUser, selectAuthError, selectAuthMessage } from "@core/store/auth/auth.selectors"
 import type { User } from "@core/models/user.model"
+import { AuthService } from "@core/services/auth.service"
+import { MatSnackBar } from "@angular/material/snack-bar"
 
 @Component({
   selector: "app-profile",
@@ -176,8 +178,11 @@ import type { User } from "@core/models/user.model"
 export class ProfileComponent implements OnInit {
   private fb = inject(FormBuilder)
   private store = inject(Store)
+  private authService = inject(AuthService)
+  private snackBar = inject(MatSnackBar)
 
   user$: Observable<User | null> = this.store.select(selectUser)
+  error$: Observable<string | null> = this.store.select(selectAuthError)
   profileForm: FormGroup
   passwordForm: FormGroup
   loading = false
@@ -203,6 +208,22 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.subscribeToUser();
+
+    this.error$.subscribe(error => {
+      if (error) {
+        this.snackBar.open(error, 'Close', { duration: 5000 });
+      }
+    });
+
+    this.message$.subscribe(message => {
+      if (message) {
+        this.snackBar.open(message, 'Close', { duration: 5000 });
+      }
+    });
+  }
+
+  private subscribeToUser(): void {
     this.user$.subscribe((user) => {
       if (user) {
         this.profileForm.patchValue({
@@ -231,24 +252,41 @@ export class ProfileComponent implements OnInit {
 
   onSubmit(): void {
     if (this.profileForm.valid) {
-      this.loading = true
-      // Mock API call
-      setTimeout(() => {
-        console.log("Profile updated:", this.profileForm.value)
-        this.loading = false
-      }, 1000)
+      const updatedUser: Partial<User> = this.profileForm.value;
+      this.loading = true;
+      this.authService.updateUserProfile(updatedUser).subscribe({
+        next: (user) => {
+          console.log('Profile updated successfully', user);
+          this.loading = false;
+          this.snackBar.open('Profile updated successfully', 'Close', { duration: 3000 });
+        },
+        error: (err) => {
+          console.error('Profile update failed', err);
+          this.loading = false;
+          // Error handled by the error$ subscription and MatSnackBar
+        }
+      });
     }
   }
 
   onPasswordSubmit(): void {
     if (this.passwordForm.valid) {
-      this.passwordLoading = true
-      // Mock API call
-      setTimeout(() => {
-        console.log("Password changed")
-        this.passwordForm.reset()
-        this.passwordLoading = false
-      }, 1000)
+      const passwordChangeRequest = this.passwordForm.value;
+      this.passwordLoading = true;
+      // Assuming changePassword method in AuthService expects an object with currentPassword and newPassword
+      this.authService.changePassword(passwordChangeRequest).subscribe({
+        next: () => {
+          console.log('Password changed successfully');
+          this.passwordLoading = false;
+          this.passwordForm.reset();
+          this.snackBar.open('Password changed successfully', 'Close', { duration: 3000 });
+        },
+        error: (err) => {
+          console.error('Password change failed', err);
+          this.passwordLoading = false;
+          // Error handled by the error$ subscription and MatSnackBar
+        }
+      });
     }
   }
 

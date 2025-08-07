@@ -1,0 +1,100 @@
+scss
+/* Checkout Component Styles */
+
+.checkout-container {
+  padding: 20px;
+  max-width: 800px; /* Limit width */
+  margin: 20px auto; /* Center the container */
+}
+
+/* Style the Material Stepper */
+mat-stepper {
+  background-color: #fff; /* White background for the stepper */
+  border: 1px solid #e0e0e0; /* Subtle border */
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px; /* Space between fields in a row */
+  margin-bottom: 16px; /* Space below the row */
+}
+
+.full-width {
+  width: 100%;
+}
+
+.half-width {
+  flex: 1; /* Allow half-width fields to take equal space */
+}
+
+mat-form-field {
+  width: 100%; /* Make form fields take full width of their container (form-row or full-width) */
+  margin-bottom: 0; /* Remove default margin-bottom from mat-form-field */
+}
+
+.step-actions {
+  display: flex;
+  justify-content: flex-end; /* Align action buttons to the right */
+  gap: 16px; /* Space between buttons */
+  margin-top: 24px; /* Space above action buttons */
+}
+
+/* Style for the order summary section in the review step */
+.order-summary {
+  padding: 20px 0;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.order-total {
+  padding: 16px 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: right;
+  border-top: 1px solid #ccc;
+  margin-top: 16px;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .checkout-container {
+    padding: 15px;
+  }
+
+  .form-row {
+    flex-direction: column; /* Stack fields in a column on smaller screens */
+    gap: 0; /* Remove gap when stacked */
+  }
+
+  .half-width {
+    margin-bottom: 16px; /* Add back margin when stacked */
+  }
+
+  .step-actions {
+    flex-direction: column; /* Stack action buttons */
+    align-items: stretch; /* Stretch buttons to fill width */
+    gap: 10px; /* Adjust gap */
+  }
+
+  .step-actions button {
+      width: 100%; /* Full width buttons when stacked */
+  }
+}
+
+@media (max-width: 480px) {
+  .checkout-container {
+    padding: 10px;
+  }
+
+  mat-stepper {
+    padding: 15px;
+  }
+}

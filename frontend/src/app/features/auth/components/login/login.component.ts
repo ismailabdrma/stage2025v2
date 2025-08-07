@@ -132,6 +132,7 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.valid) {
       const formValue = this.loginForm.value;
       this.store.dispatch(AuthActions.login({ request: formValue }));
+      // TODO: Intelligent redirection after successful login or requiring OTP is handled in NgRx effects
     }
   }
 }

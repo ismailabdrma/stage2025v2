@@ -1,0 +1,97 @@
+<div class="order-detail-container">
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading order details...</p>
+  </div>
+
+  <div *ngIf="!loading && order">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Order #{{ order.id }}</mat-card-title>
+        <mat-card-subtitle>
+          Placed on {{ order.createdDate | date:'medium' }}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="order-status">
+          <mat-chip [color]="getStatusColor(order.status)">
+            {{ order.status }}
+          </mat-chip>
+        </div>
+
+        <div class="order-items">
+          <h3>Order Items</h3>
+          <table mat-table [dataSource]="order.items" class="items-table">
+            <ng-container matColumnDef="product">
+              <th mat-header-cell *matHeaderCellDef>Product</th>
+              <td mat-cell *matCellDef="let item">{{ item.productName }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="quantity">
+              <th mat-header-cell *matHeaderCellDef>Quantity</th>
+              <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="price">
+              <th mat-header-cell *matHeaderCellDef>Unit Price</th>
+              <td mat-cell *matCellDef="let item">${{ item.unitPrice | number:'1.2-2' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>Total</th>
+              <td mat-cell *matCellDef="let item">${{ (item.quantity * item.unitPrice) | number:'1.2-2' }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <div class="order-summary">
+          <div class="summary-row">
+            <span>Subtotal:</span>
+            <span>${{ order.subtotal | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping:</span>
+            <span>${{ order.shipping | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Tax:</span>
+            <span>${{ order.tax | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-row total">
+            <span><strong>Total:</strong></span>
+            <span><strong>${{ order.total | number:'1.2-2' }}</strong></span>
+          </div>
+        </div>
+
+        <div class="shipping-info" *ngIf="order.shippingAddress">
+          <h3>Shipping Address</h3>
+          <p>
+            {{ order.shippingAddress.firstName }} {{ order.shippingAddress.lastName }}<br>
+            {{ order.shippingAddress.address }}<br>
+            {{ order.shippingAddress.city }}, {{ order.shippingAddress.postalCode }}
+          </p>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button routerLink="/orders">
+          <mat-icon>arrow_back</mat-icon>
+          Back to Orders
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <div *ngIf="!loading && !order" class="not-found">
+    <mat-icon>error</mat-icon>
+    <h3>Order not found</h3>
+    <p>The order you're looking for doesn't exist.</p>
+    <button mat-raised-button color="primary" routerLink="/orders">
+      Back to Orders
+    </button>
+  </div>
+</div>

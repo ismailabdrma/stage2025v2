@@ -1,4 +1,4 @@
-import { Component, type OnInit } from "@angular/core"
+import { Component, type OnInit, inject } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { RouterModule } from "@angular/router"
 import { MatCardModule } from "@angular/material/card"
@@ -6,7 +6,9 @@ import { MatButtonModule } from "@angular/material/button"
 import { MatIconModule } from "@angular/material/icon"
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
 import { MatChipsModule } from "@angular/material/chips"
-import { MatTableModule } from "@angular/material/table"
+import { MatTableModule } from "@angular/material/table";
+import { OrderService } from "@core/services/order.service";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: "app-order-list",
@@ -19,6 +21,7 @@ import { MatTableModule } from "@angular/material/table"
     MatIconModule,
     MatProgressSpinnerModule,
     MatChipsModule,
+ @angular/material/snack-bar";
     MatTableModule,
   ],
   template: `
@@ -122,29 +125,26 @@ import { MatTableModule } from "@angular/material/table"
   ],
 })
 export class OrderListComponent implements OnInit {
+  private orderService = inject(OrderService);
+  private snackBar = inject(MatSnackBar);
+
   orders: any[] = []
   loading = true
   displayedColumns = ["id", "date", "status", "total", "actions"]
 
   ngOnInit(): void {
-    // Mock data for now
-    setTimeout(() => {
-      this.orders = [
-        {
-          id: 1,
-          createdDate: new Date(),
-          status: "PENDING",
-          total: 99.99,
-        },
-        {
-          id: 2,
-          createdDate: new Date(Date.now() - 86400000),
-          status: "SHIPPED",
-          total: 149.99,
-        },
-      ]
-      this.loading = false
-    }, 1000)
+ this.orderService.getOrders().subscribe(
+      (orders) => {
+ this.orders = orders;
+ this.loading = false;
+ },
+      (error) => {
+ this.snackBar.open("Failed to load orders.", "Close", {
+ duration: 3000,
+ });
+ this.loading = false;
+ }
+ );
   }
 
   getStatusColor(status: string): string {

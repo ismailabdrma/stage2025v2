@@ -1,6 +1,6 @@
 import { Injectable, inject } from "@angular/core"
-import { HttpClient } from "@angular/common/http"
 import type { Observable } from "rxjs"
+import { HttpClient, HttpParams } from "@angular/common/http"
 import { environment } from "@environments/environment"
 import type { Product, Category } from "../models/product.model"
 
@@ -11,8 +11,27 @@ export class ProductService {
   private http = inject(HttpClient)
   private apiUrl = `${environment.apiUrl}/api`
 
-  getAllProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(`${this.apiUrl}/products`)
+  getAllProducts(params?: {
+    category?: string;
+    supplier?: string;
+    search?: string;
+    sortBy?: string;
+    page?: number;
+    size?: number;
+    includeInactive?: boolean;
+  }): Observable<Product[]> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.keys(params).forEach(key => {
+        const value = (params as any)[key];
+        if (value !== undefined && value !== null) {
+          httpParams = httpParams.append(key, value.toString());
+        }
+      });
+    }
+    return this.http.get<Product[]>(`${this.apiUrl}/products`, {
+      params: httpParams,
+    });
   }
 
   getProductById(id: number): Observable<Product> {
@@ -35,23 +54,15 @@ export class ProductService {
     return this.http.delete<void>(`${this.apiUrl}/products/${id}`)
   }
 
-  getAllCategories(): Observable<Category[]> {
-    return this.http.get<Category[]>(`${this.apiUrl}/categories`)
+  updateProductStatus(id: number, isActive: boolean): Observable<Product> {
+ return this.http.put<Product>(`${this.apiUrl}/products/${id}/status`, { isActive });
   }
 
-  getCategoryById(id: number): Observable<Category> {
-    return this.http.get<Category>(`${this.apiUrl}/categories/${id}`)
+  getFeaturedProducts(): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/products?featured=true`);
   }
 
-  createCategory(category: Partial<Category>): Observable<Category> {
-    return this.http.post<Category>(`${this.apiUrl}/categories`, category)
-  }
-
-  updateCategory(id: number, category: Partial<Category>): Observable<Category> {
-    return this.http.put<Category>(`${this.apiUrl}/categories/${id}`, category)
-  }
-
-  deleteCategory(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/categories/${id}`)
+  getSuggestedProducts(id: number): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/products/${id}/suggested`);
   }
 }

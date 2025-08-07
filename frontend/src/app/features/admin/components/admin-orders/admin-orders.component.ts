@@ -10,6 +10,7 @@ import { MatInputModule } from "@angular/material/input"
 import { MatButtonModule } from "@angular/material/button"
 import { MatIconModule } from "@angular/material/icon"
 import { MatChipsModule } from "@angular/material/chips"
+import { MatSnackBar } from "@angular/material/snack-bar"
 import { OrderService } from "@core/services/order.service"
 import type { Order } from "@core/models/order.model"
 
@@ -28,11 +29,13 @@ import type { Order } from "@core/models/order.model"
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
+    MatSnackBar,
   ],
   templateUrl: "./admin-orders.component.html",
   styleUrl: "./admin-orders.component.scss",
 })
 export class AdminOrdersComponent implements OnInit {
+  private snackBar = inject(MatSnackBar)
   private orderService = inject(OrderService)
 
   orders: Order[] = []
@@ -49,6 +52,7 @@ export class AdminOrdersComponent implements OnInit {
       },
       error: (error) => {
         console.error("Error loading orders:", error)
+ this.snackBar.open("Failed to load orders.", "Close", { duration: 3000 })
         this.orders = []
       },
     })
@@ -69,5 +73,18 @@ export class AdminOrdersComponent implements OnInit {
       default:
         return ""
     }
+  }
+
+  updateOrderStatus(order: Order, status: string): void {
+    this.orderService.updateOrderStatus(order.id, status).subscribe({
+      next: (updatedOrder) => {
+        this.snackBar.open(`Order #${updatedOrder.id} status updated to ${updatedOrder.status}`, "Close", { duration: 3000 })
+        this.loadOrders() // Refresh the list
+      },
+      error: (error) => {
+        console.error("Error updating order status:", error)
+ this.snackBar.open("Failed to update order status.", "Close", { duration: 3000 })
+      },
+    })
   }
 }

@@ -9,6 +9,7 @@ import { MatSelectModule } from "@angular/material/select"
 import { MatButtonModule } from "@angular/material/button"
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
 import { ProductService } from "@core/services/product.service"
+import { MatSnackBar } from "@angular/material/snack-bar"
 import type { Product, Category } from "@core/models/product.model"
 
 @Component({
@@ -23,6 +24,7 @@ import type { Product, Category } from "@core/models/product.model"
         MatSelectModule,
         MatButtonModule,
         MatProgressSpinnerModule,
+ MatSnackBar,
     ],
     template: `
         <h2 mat-dialog-title>{{ data ? 'Edit Product' : 'Create Product' }}</h2>
@@ -143,6 +145,7 @@ export class CreateProductDialogComponent {
     private fb = inject(FormBuilder)
     private productService = inject(ProductService)
     private dialogRef = inject(MatDialogRef<CreateProductDialogComponent>)
+ private snackBar = inject(MatSnackBar)
 
     productForm: FormGroup
     categories: Category[] = []
@@ -203,6 +206,7 @@ export class CreateProductDialogComponent {
                 },
                 error: (error) => {
                     console.error("Error saving product:", error)
+ this.snackBar.open(`Error saving product: ${error.message || 'Unknown error'}`, 'Close', { duration: 3000 });
                     this.loading = false
                 },
             })

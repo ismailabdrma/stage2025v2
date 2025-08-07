@@ -39,7 +39,10 @@
                             <mat-icon>{{ supplier.active ? 'block' : 'check_circle' }}</mat-icon>
                         </button>
                         <button mat-icon-button color="warn" (click)="deleteSupplier(supplier.id)">
-                            <mat-icon>delete</mat-icon>
+ <mat-icon>delete</mat-icon>
+ </button>
+ <button mat-icon-button color="primary" (click)="importProducts(supplier.id)">
+                            <mat-icon>cloud_upload</mat-icon>
                         </button>
                     </td>
                 </ng-container>

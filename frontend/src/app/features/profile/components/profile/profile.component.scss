@@ -1,0 +1,78 @@
+scss
+/* Profile Component Styles */
+
+.profile-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+mat-card {
+  margin-bottom: 20px;
+}
+
+mat-card-title {
+  font-size: 1.5em;
+  margin-bottom: 8px;
+}
+
+mat-card-subtitle {
+  color: #666;
+}
+
+mat-card-content form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.half-width {
+  flex: 1;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+/* Styles for Addresses Component Integration */
+app-addresses {
+  display: block; /* Ensure it takes up space */
+  margin-top: 24px;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 15px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 0;
+  }
+
+  .half-width {
+      margin-bottom: 16px;
+  }
+}

@@ -7,6 +7,36 @@
   width: 100%;
 }
 
+.table-container {
+  overflow-x: auto;
+  margin-top: 20px;
+  mat-card {
+    padding: 0;
+  }
+}
+
+.full-width-table {
+  width: 100%;
+}
+
+.action-column {
+  white-space: nowrap;
+  .mat-icon-button {
+    padding: 0 8px;
+  }
+}
+
+.header-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+mat-card-title {
+  margin-bottom: 20px;
+}
+
 .mat-chip {
   margin: 0 2px;
 }

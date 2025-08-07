@@ -7,6 +7,8 @@ import { MatIconModule } from "@angular/material/icon"
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
 import { MatChipsModule } from "@angular/material/chips"
 import { MatTableModule } from "@angular/material/table"
+import { OrderService } from "@core/services/order.service"
+import { MatSnackBar } from "@angular/material/snack-bar"
 
 @Component({
   selector: "app-order-detail",
@@ -106,14 +108,14 @@ import { MatTableModule } from "@angular/material/table"
               <mat-icon>arrow_back</mat-icon>
               Back to Orders
             </button>
-            <button mat-button *ngIf="order.status === 'PENDING'">
+ <button mat-button *ngIf="order.status === 'PENDING'" (click)="cancelOrder()">
               Cancel Order
             </button>
           </mat-card-actions>
         </mat-card>
       </div>
 
-      <div *ngIf="!loading && !order" class="not-found">
+      <div *ngIf="!loading && !order" class="no-items">
         <mat-icon>error</mat-icon>
         <h3>Order not found</h3>
         <p>The order you're looking for doesn't exist.</p>
@@ -130,7 +132,7 @@ import { MatTableModule } from "@angular/material/table"
       max-width: 1000px;
       margin: 0 auto;
     }
-
+/* Styles for loading and not found states (moved to utilities.scss) */
     .loading-container, .not-found {
       display: flex;
       flex-direction: column;
@@ -178,6 +180,8 @@ import { MatTableModule } from "@angular/material/table"
   ],
 })
 export class OrderDetailComponent implements OnInit {
+  private orderService = inject(OrderService)
+  private snackBar = inject(MatSnackBar)
   private route = inject(ActivatedRoute)
 
   order: any = null
@@ -192,33 +196,18 @@ export class OrderDetailComponent implements OnInit {
   }
 
   loadOrder(id: number): void {
-    // Mock data for now
-    setTimeout(() => {
-      this.order = {
-        id: id,
-        createdDate: new Date(),
-        status: "PENDING",
-        items: [
-          {
-            productName: "Sample Product",
-            quantity: 2,
-            unitPrice: 49.99,
-          },
-        ],
-        subtotal: 99.98,
-        shipping: 9.99,
-        tax: 8.99,
-        total: 118.96,
-        shippingAddress: {
-          firstName: "John",
-          lastName: "Doe",
-          address: "123 Main St",
-          city: "Anytown",
-          postalCode: "12345",
-        },
-      }
-      this.loading = false
-    }, 1000)
+ this.loading = true
+ this.orderService.getOrderById(id).subscribe({
+      next: (order) => {
+        this.order = order
+        this.loading = false
+      },
+      error: (err) => {
+        console.error("Error fetching order details:", err)
+        this.loading = false
+ this.snackBar.open("Error loading order details.", "Close", { duration: 4000 })
+      },
+    })
   }
 
   getStatusColor(status: string): string {
@@ -231,6 +220,21 @@ export class OrderDetailComponent implements OnInit {
         return "accent"
       default:
         return ""
+    }
+  }
+
+  cancelOrder(): void {
+    if (this.order && this.order.id && this.order.status === 'PENDING') {
+      this.orderService.cancelOrder(this.order.id).subscribe({
+        next: () => {
+          this.snackBar.open("Order cancelled successfully.", "Close", { duration: 4000 });
+          this.loadOrder(this.order.id); // Refresh order details
+        },
+        error: (err) => {
+          console.error("Error cancelling order:", err);
+          this.snackBar.open("Error cancelling order.", "Close", { duration: 4000 });
+        }
+      });
     }
   }
 }

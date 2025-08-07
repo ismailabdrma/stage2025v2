@@ -1,0 +1,56 @@
+<div class="container">
+  <div class="filters-sorting">
+    <div class="filters">
+      <mat-form-field appearance="outline">
+        <mat-label>Category</mat-label>
+        <mat-select [(ngModel)]="selectedCategory" (selectionChange)="onCategoryChange($event.value)">
+ <mat-option [value]="null">All Categories</mat-option>
+          <!-- Options populated from backend -->
+ <mat-option *ngFor="let category of categories" [value]="category.id">{{ category.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Supplier</mat-label>
+        <mat-select [(ngModel)]="selectedSupplier" (selectionChange)="onSupplierChange($event.value)">
+ <mat-option [value]="null">All Suppliers</mat-option>
+          <!-- Options populated from backend -->
+          <!-- TODO: Populate suppliers from backend -->
+ <mat-option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Search</mat-label>
+        <input matInput type="text" placeholder="Search products..." [(ngModel)]="searchTerm" (keydown.enter)="applyFilters()">
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" (click)="applyFilters()">Apply Filters</button>
+    </div>
+    <div class="sorting">
+      <mat-form-field appearance="outline">
+        <mat-label>Sort By</mat-label>
+        <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange($event.value)">
+        <option value="nameAsc">Name (A-Z)</option>
+        <option value="nameDesc">Name (Z-A)</option>
+        <option value="priceAsc">Price (Low to High)</option>
+        <option value="priceDesc">Price (High to Low)</option>
+ </mat-select>
+      </mat-form-field>
+
+    </div>
+  </div>
+
+  <div class="product-grid">
+    <!-- Product Cards will be rendered here -->
+    <app-product-card *ngFor="let product of products" [product]="product"></app-product-card>
+  </div>
+
+  <div class="pagination">
+    <mat-paginator [length]="totalProducts"
+                   [pageSize]="pageSize"
+                   [pageIndex]="currentPage - 1"
+                   [pageSizeOptions]="[5, 10, 25, 100]"
+                   (page)="onPageChange($event)"></mat-paginator>
+  </div>
+</div>

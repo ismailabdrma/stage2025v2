@@ -1,0 +1,42 @@
+<div class="cart-container">
+  <h1>Shopping Cart</h1>
+
+  <div *ngIf="cart && cart.items && cart.items.length > 0; else emptyCart">
+    <div class="cart-items">
+      <div class="cart-item" *ngFor="let item of cart.items">
+        <div class="item-details">
+          <img [src]="item.product.imageUrl || 'placeholder.jpg'" alt="{{ item.product.name }}" class="item-image">
+          <div class="item-info">
+ <h3>{{ item.product.name }}</h3>
+ <p>Price: {{ item.product.price | currency }}</p>
+          </div>
+        </div>
+        <div class="item-quantity">
+ <button (click)="updateQuantity(item, item.quantity - 1)">-</button>
+ <input type="number" [(ngModel)]="item.quantity" min="1" (change)="updateQuantity(item, item.quantity)">
+ <button (click)="updateQuantity(item, item.quantity + 1)">+</button>
+        </div>
+        <div class="item-total">
+ <p>Total: {{ item.product.price * item.quantity | currency }}</p>
+
+        </div>
+        <button class="remove-button" (click)="removeItem(item.id)">Remove</button>
+      </div>
+    </div>
+
+    <div class="cart-summary">
+      <h2>Order Summary</h2>
+      <p>Subtotal: {{ cart.subtotal | currency }}</p>
+ <p>Estimated Shipping: 0.00 {{ 'USD' | currency }}</p> <!-- Placeholder -->
+      <h3>Total: {{ cart.total | currency }}</h3>
+ <button class="checkout-button" [disabled]="isCartEmpty" (click)="goToCheckout()">Valider commande</button>
+    </div>
+  </div>
+
+  <ng-template #emptyCart>
+    <div class="empty-cart">
+      <p>Your cart is empty.</p>
+      <button routerLink="/products">Continue Shopping</button>
+    </div>
+  </ng-template>
+</div>

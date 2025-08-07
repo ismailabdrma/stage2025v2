@@ -1,0 +1,68 @@
+<h2 mat-dialog-title>{{ data ? 'Edit Supplier' : 'Add Supplier' }}</h2>
+<div mat-dialog-content>
+  <form [formGroup]="supplierForm">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" required>
+      <mat-error *ngIf="supplierForm.get('name')?.hasError('required')">
+        Name is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type" required (selectionChange)="onTypeChange()">
+        <mat-option value="API">API</mat-option>
+        <mat-option value="CSV">CSV</mat-option>
+        <mat-option value="EXCEL">Excel</mat-option>
+        <mat-option value="SOAP">SOAP</mat-option>
+      </mat-select>
+      <mat-error *ngIf="supplierForm.get('type')?.hasError('required')">
+        Type is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Endpoint / File URL</mat-label>
+      <input matInput formControlName="url" required placeholder="API endpoint or file path">
+      <mat-error *ngIf="supplierForm.get('url')?.hasError('required')">
+        Endpoint / File URL is required
+      </mat-error>
+    </mat-form-field>
+
+    <!-- SOAP-specific fields -->
+    <ng-container *ngIf="supplierForm.get('type')?.value === 'SOAP'">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>WSDL URL</mat-label>
+        <input matInput formControlName="wsdlUrl" (blur)="loadSoapOperations()" required>
+        <mat-hint>Enter WSDL, then select operation below</mat-hint>
+        <mat-error *ngIf="supplierForm.get('wsdlUrl')?.hasError('required')">
+          WSDL URL is required for SOAP suppliers
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>SOAP Operation</mat-label>
+        <mat-select formControlName="operation" [disabled]="soapOperations.length === 0 || loadingOps" required>
+          <mat-option *ngFor="let op of soapOperations" [value]="op">
+            {{ op }}
+          </mat-option>
+        </mat-select>
+        <mat-progress-spinner *ngIf="loadingOps" diameter="24" mode="indeterminate"></mat-progress-spinner>
+        <mat-error *ngIf="supplierForm.get('operation')?.hasError('required')">
+          SOAP Operation is required for SOAP suppliers
+        </mat-error>
+      </mat-form-field>
+    </ng-container>
+
+  </form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button color="primary"
+          (click)="onSave()"
+          [disabled]="supplierForm.invalid || loadingOps">
+    <mat-spinner diameter="20" *ngIf="loadingOps"></mat-spinner>
+    <span *ngIf="!loadingOps">{{ data ? 'Update' : 'Create' }}</span>
+  </button>
+</div>

@@ -1,0 +1,30 @@
+scss
+/* Shared Utility Styles */
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.loading-container mat-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  margin-bottom: 16px;
+}
+
+.no-items {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.no-items mat-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  margin-bottom: 16px;
+}

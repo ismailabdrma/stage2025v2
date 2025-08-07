@@ -9,7 +9,14 @@ import { MatFormFieldModule } from "@angular/material/form-field"
 import { MatInputModule } from "@angular/material/input"
 import { MatSelectModule } from "@angular/material/select"
 import { MatStepperModule } from "@angular/material/stepper"
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CartService } from "@core/services/cart.service"
+import { AddressService } from "@core/services/address.service"
+import { MatDialog } from "@angular/material/dialog"
+import { AddressDialogComponent } from "@app/features/profile/components/address-dialog/address-dialog.component"
+import { OrderService } from "@core/services/order.service"
+import { PaymentService } from "@core/services/payment.service"
 import type { Cart } from "@core/models/cart.model"
 
 @Component({
@@ -26,6 +33,7 @@ import type { Cart } from "@core/models/cart.model"
     MatInputModule,
     MatSelectModule,
     MatStepperModule,
+ MatProgressSpinnerModule
   ],
   template: `
     <div class="checkout-container">
@@ -65,6 +73,18 @@ import type { Cart } from "@core/models/cart.model"
                   </mat-form-field>
                 </div>
 
+ <mat-form-field appearance="outline" class="full-width">
+ <mat-label>Select Address</mat-label>
+ <mat-select [(ngModel)]="selectedAddressId" (selectionChange)="onAddressSelect()" [ngModelOptions]="{standalone: true}">
+ <mat-option *ngFor="let address of addresses" [value]="address.id">
+ {{ address.label }} - {{ address.address }}, {{ address.city }}
+ </mat-option>
+ </mat-select>
+ </mat-form-field>
+
+ <button mat-button (click)="openAddressDialog()">
+ Add New Address
+ </button>
                 <div class="step-actions">
                   <button mat-raised-button color="primary" matStepperNext>Next</button>
                 </div>
@@ -116,8 +136,11 @@ import type { Cart } from "@core/models/cart.model"
 
                 <div class="step-actions">
                   <button mat-button matStepperPrevious>Back</button>
-                  <button mat-raised-button color="primary" (click)="placeOrder()">
-                    Place Order
+                  <button mat-raised-button color="primary" (click)="placeOrder()" [disabled]="placingOrder">
+ <mat-spinner diameter="20" *ngIf="placingOrder"></mat-spinner>
+ <span *ngIf="!placingOrder">
+ Place Order
+ </span>
                   </button>
                 </div>
               </div>
@@ -186,10 +209,19 @@ export class CheckoutComponent implements OnInit {
   private fb = inject(FormBuilder)
   private cartService = inject(CartService)
   private router = inject(Router)
+  private orderService = inject(OrderService)
+  private paymentService = inject(PaymentService)
+ private addressService = inject(AddressService)
+ private dialog = inject(MatDialog);
+ private snackBar = inject(MatSnackBar);
+
 
   shippingForm: FormGroup
   paymentForm: FormGroup
   cart: Cart | null = null
+  loadingCart = true;
+  loadingAddresses = true;
+  placingOrder = false;
 
   constructor() {
     this.shippingForm = this.fb.group({
@@ -198,6 +230,8 @@ export class CheckoutComponent implements OnInit {
       address: ["", Validators.required],
       city: ["", Validators.required],
       postalCode: ["", Validators.required],
+ country: [""],
+ phone: [""]
     })
 
     this.paymentForm = this.fb.group({
@@ -209,7 +243,17 @@ export class CheckoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadCart()
+ this.loadCart();
+ this.loadAddresses();
+  }
+
+  loadAddresses(): void {
+ this.addressService.getAddresses().subscribe({
+ next: (addresses) => {
+ this.addresses = addresses;
+      },
+ error: (error) => console.error("Error loading addresses:", error)
+    });
   }
 
   loadCart(): void {
@@ -228,9 +272,53 @@ export class CheckoutComponent implements OnInit {
     return this.cart.items.reduce((total, item) => total + item.unitPrice * item.quantity, 0)
   }
 
+ onAddressSelect(): void {
+    const selectedAddress = this.addresses.find(addr => addr.id === this.selectedAddressId);
+    if (selectedAddress) {
+      this.shippingForm.patchValue(selectedAddress);
+    }
+  }
+
+ openAddressDialog(): void {
+    const dialogRef = this.dialog.open(AddressDialogComponent, {
+      width: \'400px\',
+ data: null // No data for adding a new address
+    });
+
+ dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+ this.addressService.addAddress(result).subscribe({
+ next: () => this.loadAddresses(), // Refresh list after adding
+ error: (error) => console.error("Error adding address:", error)
+        });
+      }
+    });
+  }
+
   placeOrder(): void {
-    // Mock order placement
-    console.log("Order placed successfully!")
-    this.router.navigate(["/orders"])
+    if (this.shippingForm.valid && this.paymentForm.valid && this.cart && this.cart.items.length > 0) {
+      const orderRequest = {
+        shippingAddress: this.shippingForm.value,
+        orderItems: this.cart.items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity
+        }))
+      };
+
+      this.orderService.createOrder(orderRequest).subscribe({
+        next: (order) => {
+          const paymentData = {
+            orderId: order.id,
+            paymentMethod: 'card', // Assuming card for now
+            paymentInfo: this.paymentForm.value // Sensitive payment info should be handled securely
+          };
+          this.paymentService.processPayment(paymentData).subscribe({
+            next: () => this.router.navigate(['/orders', order.id]),
+            error: (error) => console.error("Payment processing failed:", error) // Handle payment error
+          });
+        },
+        error: (error) => console.error("Order creation failed:", error) // Handle order creation error
+      });
+    }
   }
 }

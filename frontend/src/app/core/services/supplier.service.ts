@@ -33,4 +33,8 @@ export class SupplierService {
     deactivateSupplier(id: number): Observable<void> {
         return this.http.put<void>(`${this.api}/${id}/deactivate`, {});
     }
+
+    importProducts(id: number): Observable<any> {
+        return this.http.post<any>(`${this.api}/${id}/import-products`, {});
+    }
 }

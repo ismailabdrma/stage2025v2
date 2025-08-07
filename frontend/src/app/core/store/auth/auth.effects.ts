@@ -19,9 +19,11 @@ export class AuthEffects {
             exhaustMap(({ request }) =>
                 this.authService.login(request).pipe(
                     mergeMap((response : any) => {
+                        // TODO: Handle successful login with JWT token response and dispatch AuthActions.loginComplete
                         if (response && response.status === "OTP_REQUIRED") {
                             // Redirect to verify-otp page with email as query param
                             this.router.navigate(["/auth/verify-otp"], {
+
                                 queryParams: { email: request.identifier }
                             });
                             return [

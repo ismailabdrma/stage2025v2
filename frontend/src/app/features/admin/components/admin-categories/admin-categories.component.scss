@@ -1,0 +1,62 @@
+scss
+/* Admin Categories Styles */
+
+.admin-categories-container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 20px auto;
+}
+
+.mat-card {
+  margin-bottom: 20px;
+}
+
+.mat-card-header {
+  padding-bottom: 0;
+}
+
+.mat-card-title {
+  font-size: 1.5em;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.categories-table {
+  width: 100%;
+  margin-top: 20px;
+
+  th.mat-header-cell {
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  td.mat-cell {
+    padding: 8px 16px;
+  }
+
+  .mat-column-actions {
+    white-space: nowrap;
+  }
+}
+
+.add-category-button {
+  margin-bottom: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .admin-categories-container {
+    padding: 10px;
+  }
+
+  .mat-card-title {
+    font-size: 1.2em;
+  }
+
+  .categories-table {
+    /* Optional: Adjust font size for smaller screens */
+    font-size: 0.9em;
+  }
+}

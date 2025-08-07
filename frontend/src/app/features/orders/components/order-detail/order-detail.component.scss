@@ -1,0 +1,98 @@
+scss
+/* Order Detail Page Styles */
+
+.order-detail-container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.order-status {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.order-items {
+  margin-bottom: 24px;
+}
+
+.items-table {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.order-summary {
+  border-top: 1px solid #ddd;
+  padding-top: 16px;
+  margin-bottom: 24px;
+  font-size: 1.1em;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.summary-row.total {
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  margin-top: 8px;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.shipping-info {
+  margin-bottom: 24px;
+}
+
+.shipping-info h3 {
+    margin-bottom: 10px;
+}
+
+mat-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px;
+}
+
+mat-chip {
+    font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .order-detail-container {
+    padding: 15px;
+  }
+
+  .order-status {
+    margin-bottom: 16px;
+  }
+
+  .order-items {
+    margin-bottom: 16px;
+  }
+
+  .order-summary {
+    font-size: 1em;
+  }
+
+  .summary-row.total {
+    font-size: 1.1em;
+  }
+
+  .shipping-info {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+    mat-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+@import '../../../../shared/styles/utilities.scss';

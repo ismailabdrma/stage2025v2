@@ -1,12 +1,12 @@
 import type { Routes } from "@angular/router"
 import { authGuard } from "./core/guards/auth.guard"
 import { adminGuard } from "./core/guards/admin.guard"
+import { HomeComponent } from "./features/home/home.component"
 
 export const routes: Routes = [
   {
     path: "",
-    redirectTo: "/products",
-    pathMatch: "full",
+    component: HomeComponent,
   },
   {
     path: "auth",

@@ -1,3 +1,5 @@
+
+
 import { Component, type OnInit, inject } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { RouterModule } from "@angular/router"
@@ -8,6 +10,9 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
 import { MatTableModule } from "@angular/material/table"
 import { MatInputModule } from "@angular/material/input"
 import { MatFormFieldModule } from "@angular/material/form-field"
+import { MatDialog, MatDialogRef } from "@angular/material/dialog"
+import { MatSnackBar } from "@angular/material/snack-bar"
+import { ConfirmDialogComponent } from "@shared/components/confirm-dialog/confirm-dialog.component" // Assuming path to ConfirmDialogComponent
 import { CartService } from "@core/services/cart.service"
 import type { Cart, CartItem } from "@core/models/cart.model"
 
@@ -16,6 +21,7 @@ import type { Cart, CartItem } from "@core/models/cart.model"
   standalone: true,
   imports: [
     CommonModule,
+    MatDialogModule, // Import MatDialogModule
     RouterModule,
     MatCardModule,
     MatButtonModule,
@@ -94,7 +100,7 @@ import type { Cart, CartItem } from "@core/models/cart.model"
             </div>
           </div>
 
-          <div *ngIf="!loading && (!cart || cart.items.length === 0)" class="empty-cart">
+          <div *ngIf="!loading && (!cart || cart.items.length === 0)" class="no-items">
             <mat-icon>shopping_cart</mat-icon>
             <h3>Your cart is empty</h3>
             <p>Add some products to get started!</p>
@@ -150,24 +156,14 @@ import type { Cart, CartItem } from "@core/models/cart.model"
       margin-top: 16px;
     }
 
-    .empty-cart {
-      text-align: center;
-      padding: 40px;
-      color: #666;
-    }
-
-    .empty-cart mat-icon {
-      font-size: 48px;
-      height: 48px;
-      width: 48px;
-      margin-bottom: 16px;
-    }
   `,
   ],
 })
 export class CartComponent implements OnInit {
   private cartService = inject(CartService)
 
+  private dialog = inject(MatDialog) // Inject MatDialog
+  private snackBar = inject(MatSnackBar) // Inject MatSnackBar
   cart: Cart | null = null
   loading = true
   displayedColumns = ["product", "price", "quantity", "total", "actions"]
@@ -199,7 +195,11 @@ export class CartComponent implements OnInit {
       next: (cart) => {
         this.cart = cart
       },
-      error: (error) => {
+      error: (error: any) => {
+        let errorMessage = 'Failed to update quantity.';
+        if (error.status === 400 && error.error?.message) { // Assuming backend sends a specific error message for insufficient stock
+          errorMessage = error.error.message;
+        }
         console.error("Error updating quantity:", error)
       },
     })
@@ -210,20 +210,31 @@ export class CartComponent implements OnInit {
       next: () => {
         this.loadCart()
       },
-      error: (error) => {
+      error: (error: any) => {
+ this.snackBar.open('Failed to remove item from cart.', 'Close', { duration: 3000 });
+
         console.error("Error removing item:", error)
       },
     })
   }
 
   clearCart(): void {
-    this.cartService.clearCart().subscribe({
-      next: () => {
-        this.loadCart()
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, { // Open confirmation dialog
+      data: {
+        title: "Clear Cart",
+        message: "Are you sure you want to clear your cart?",
       },
-      error: (error) => {
-        console.error("Error clearing cart:", error)
-      },
+    })
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) { // If user confirms
+        this.cartService.clearCart().subscribe({
+          next: () => this.loadCart(),
+          error: (error: any) => {
+ this.snackBar.open('Failed to clear cart.', 'Close', { duration: 3000 });
+ console.error("Error clearing cart:", error)},
+        })
+      }
     })
   }
 

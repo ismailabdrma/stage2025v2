@@ -18,3 +18,28 @@
     align-items: stretch;
   }
 }
+
+.mat-mdc-card {
+  padding: 24px;
+}
+
+.mat-mdc-table {
+  width: 100%;
+}
+
+.mat-column-actions {
+  width: 120px;
+  text-align: center;
+  white-space: nowrap; /* Prevent buttons from wrapping */
+}
+
+.mat-column-actions button {
+  margin: 0 4px;
+}
+
+.mat-column-status {
+  width: 100px;
+  text-align: center;
+}
+
+.loading-spinner { text-align: center; padding: 20px; }

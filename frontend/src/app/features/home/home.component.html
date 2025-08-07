@@ -1,0 +1,60 @@
+<!-- Hero/banner section placeholder -->
+<section class="hero-section">
+  <div class="container">
+    <h1>Welcome to Stage2025 Marketplace</h1>
+    <p>Find the best products for your business needs.</p>
+    <button routerLink="/catalogue">View Catalogue</button>
+  </div>
+</section>
+
+<!-- Quick search bar -->
+<section class="search-section">
+  <div class="container">
+    <input type="text" [(ngModel)]="searchKeyword" placeholder="Search for products...">
+    <button (click)="search()">Search</button>
+  </div>
+</section>
+
+<!-- Categories section -->
+<section class="categories-section">
+  <div class="container">
+    <h2>Product Categories</h2>
+    <div class="category-list">
+      <div *ngFor="let category of categories" class="category-item">
+ <button class="category-button">
+ {{ category.name }}
+ </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured products section -->
+<section class="featured-products-section">
+  <div class="container">
+    <h2>Featured Products</h2>
+    <div class="product-list">
+ <app-product-card
+ *ngFor="let product of featuredProducts" [product]="product">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick links -->
+<section class="quick-links">
+    <div class="container">
+        <a routerLink="/login">Login</a>
+        <a routerLink="/signup">Signup</a>
+ <ng-container *ngIf="isAdmin">
+ <a routerLink="/admin">Admin Access</a>
+ </ng-container>
+    </div>
+</section>
+
+<!-- Mini-cart/item counter placeholder -->
+<section class="mini-cart-placeholder">
+    <div class="container">
+        <p>Cart (X items)</p>
+    </div>
+</section>

@@ -13,7 +13,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { Store } from "@ngrx/store";
 import type { Observable } from "rxjs";
 import { tap } from "rxjs/operators";
-import { AuthActions } from "@core/store/auth/auth.actions";
+import { AuthActions } from "../../../../core/store/auth/auth.actions";
 import { selectAuthLoading, selectAuthMessage } from "@core/store/auth/auth.selectors";
 
 @Component({
@@ -44,6 +44,7 @@ export class SignupComponent {
   hideConfirmPassword = true;
   loading$: Observable<boolean> = this.store.select(selectAuthLoading);
   message$: Observable<string | null> = this.store.select(selectAuthMessage);
+  error$: Observable<string | null> = this.store.select(selectAuthError);
 
   constructor() {
     this.signupForm = this.fb.group(
@@ -59,6 +60,12 @@ export class SignupComponent {
   }
 
   ngOnInit() {
+ this.error$.subscribe(error => {
+ if (error) {
+ this.snackBar.open(error, "Close", { duration: 5000 });
+ }
+ });
+
     this.message$.pipe(
         tap(message => {
           if (message) {

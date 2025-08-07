@@ -1,0 +1,55 @@
+scss
+/* Admin Supplier Payments Styles */
+
+.admin-supplier-payments-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+}
+
+.supplier-payments-table {
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* Basic responsiveness for tables - consider breaking points based on columns */
+@media (max-width: 768px) {
+  .supplier-payments-table {
+    /* Example: Stack table headers and data cells on smaller screens */
+    thead {
+      display: none;
+    }
+
+    tr {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #ddd;
+      margin-bottom: 16px;
+      padding: 8px;
+    }
+
+    td {
+      /* Behave  like a \"thead\" for display purposes */
+      border: none;
+      &::before {
+        content: attr(data-label); /* Use data-label attribute for column name */
+        font-weight: bold;
+        margin-right: 8px;
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { Component, type OnInit, inject } from "@angular/core"
+ import { Component, type OnInit, inject } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { ReactiveFormsModule } from "@angular/forms"
 import { MatCardModule } from "@angular/material/card"
@@ -8,6 +8,11 @@ import { MatFormFieldModule } from "@angular/material/form-field"
 import { MatInputModule } from "@angular/material/input"
 import { MatDialogModule, MatDialog } from "@angular/material/dialog"
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
+import { ConfirmDialogComponent } from "@shared/components/confirm-dialog/confirm-dialog.component"
+
+import { AddressService } from "@core/services/address.service";
+import { AddressDialogComponent } from "../address-dialog/address-dialog.component";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: "app-addresses",
@@ -74,7 +79,7 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
         </mat-card>
       </div>
 
-      <div *ngIf="!loading && addresses.length === 0" class="no-addresses">
+      <div *ngIf="!loading && addresses.length === 0" class="no-items">
         <mat-icon>location_off</mat-icon>
         <h3>No addresses found</h3>
         <p>Add your first address to get started.</p>
@@ -145,43 +150,78 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
 })
 export class AddressesComponent implements OnInit {
   private dialog = inject(MatDialog)
+  private addressService = inject(AddressService);
+  private snackBar = inject(MatSnackBar);
 
   addresses: any[] = []
   loading = true
 
   ngOnInit(): void {
-    this.loadAddresses()
+ this.loading = true;
+ this.addressService.getAddresses().subscribe({
+ next: (addresses) => {
+ this.addresses = addresses;
+ this.loading = false;
+      },
+ error: (err) => {
+ console.error("Error loading addresses:", err);
+ this.snackBar.open("Failed to load addresses", "Close", { duration: 3000 });
+ this.loading = false;
+      },
+    });
   }
 
-  loadAddresses(): void {
-    // Mock data
-    setTimeout(() => {
-      this.addresses = [
-        {
-          id: 1,
-          label: "Home",
-          firstName: "John",
-          lastName: "Doe",
-          address: "123 Main St",
-          city: "Anytown",
-          postalCode: "12345",
-          country: "USA",
-          phone: "+1 234 567 8900",
-          isDefault: true,
-        },
-        {
-          id: 2,
-          label: "Work",
-          firstName: "John",
-          lastName: "Doe",
-          address: "456 Business Ave",
-          city: "Business City",
-          postalCode: "67890",
-          country: "USA",
-          phone: "+1 234 567 8901",
-          isDefault: false,
-        },
-      ]
+  openAddressDialog(address?: any): void {
+    const dialogRef = this.dialog.open(AddressDialogComponent, {
+      width: '500px',
+      data: address ? { ...address } : {},
+    });
+
+ dialogRef.afterClosed().subscribe(result => {
+ if (result) {
+ if (result.id) {
+ this.addressService.updateAddress(result.id, result).subscribe({
+ next: () => this.loadAddresses(),
+ error: (err) => this.snackBar.open("Failed to update address", "Close", { duration: 3000 }),
+            });
+          } else {
+ this.addressService.addAddress(result).subscribe({
+ next: () => this.loadAddresses(),
+ error: (err) => this.snackBar.open("Failed to add address", "Close", { duration: 3000 }),
+            });
+          }
+        }
+      });
+  }
+
+  editAddress(address: any): void {
+ this.openAddressDialog(address);
+  }
+
+  deleteAddress(id: number): void {
+    if (confirm("Are you sure you want to delete this address?")) {
+ this.addressService.deleteAddress(id).subscribe({
+ next: () => this.loadAddresses(),
+ error: (err) => this.snackBar.open("Failed to delete address", "Close", { duration: 3000 }),
+      });
+    }
+  }
+
+  setDefault(id: number): void {
+    // Implement logic to set default address using the API
+    // This might require a new endpoint or updating the address with isDefault: true and setting others to false
+    console.log("Set default address not implemented yet for ID:", id);
+    this.snackBar.open("Setting default address is not yet implemented.", "Close", { duration: 3000 });
+
+    // Temporary mock update for immediate visual feedback
+ this.addresses = this.addresses.map((addr) => ({
+      ...addr,
+      isDefault: addr.id === id,
+    }));
+  }
+}
+
+
       this.loading = false
     }, 1000)
   }

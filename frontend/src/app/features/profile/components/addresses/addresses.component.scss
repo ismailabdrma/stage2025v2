@@ -1,0 +1,56 @@
+scss
+@import '../../../../shared/styles/utilities.scss';
+
+/* Addresses Component Styles */
+
+.addresses-container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 20px auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.addresses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.address-card {
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+}
+
+.address-card mat-card-header {
+  padding-bottom: 0;
+}
+
+.address-card mat-card-content {
+  flex-grow: 1;
+}
+
+.address-card mat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .addresses-grid {
+    grid-template-columns: 1fr;
+  }
+}

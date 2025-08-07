@@ -53,6 +53,14 @@ export class AuthService {
     })
   }
 
+  updateUserProfile(user: Partial<User>): Observable<User> {
+ return this.http.put<User>(`${environment.apiUrl}/api/users/me`, user);
+  }
+
+  changePassword(passwordChangeRequest: any): Observable<any> {
+ return this.http.put<any>(`${environment.apiUrl}/api/users/me/password`, passwordChangeRequest);
+  }
+
   getCurrentUser(): Observable<User> {
     return this.http.get<User>(`${environment.apiUrl}/api/users/me`)
   }
@@ -79,5 +87,22 @@ export class AuthService {
     } catch {
       return false
     }
+  }
+
+  // Admin User Management Methods
+  getAllUsers(): Observable<User[]> {
+    return this.http.get<User[]>(`${environment.apiUrl}/api/users`);
+  }
+
+  updateUserStatus(id: number, status: boolean): Observable<User> {
+    return this.http.put<User>(`${environment.apiUrl}/api/users/${id}/status`, { active: status });
+  }
+
+  deleteUser(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/api/users/${id}`);
+  }
+
+  createUser(user: any): Observable<User> {
+    return this.http.post<User>(`${environment.apiUrl}/api/users`, user);
   }
 }

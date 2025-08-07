@@ -7,6 +7,8 @@ import { MatInputModule } from "@angular/material/input"
 import { MatSelectModule } from "@angular/material/select"
 import { MatButtonModule } from "@angular/material/button"
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
+import { AuthService } from "@core/services/auth.service"
+import { MatSnackBar } from "@angular/material/snack-bar"
 
 @Component({
   selector: "app-admin-user-create",
@@ -117,8 +119,10 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
 })
 export class AdminUserCreateComponent {
   private fb = inject(FormBuilder)
+  private authService = inject(AuthService)
   private dialogRef = inject(MatDialogRef<AdminUserCreateComponent>)
-
+ private snackBar = inject(MatSnackBar)
+ 
   userForm: FormGroup
   loading = false
 
@@ -137,12 +141,19 @@ export class AdminUserCreateComponent {
   onSave(): void {
     if (this.userForm.valid) {
       this.loading = true
-      // TODO: Implement user creation API call
-      setTimeout(() => {
-        console.log("User created:", this.userForm.value)
-        this.loading = false
-        this.dialogRef.close(this.userForm.value)
-      }, 1000)
+      this.authService.createUser(this.userForm.value).subscribe({
+        next: (newUser) => {
+          this.loading = false;
+          this.snackBar.open('User created successfully!', 'Close', { duration: 3000 });
+          this.dialogRef.close(newUser); // Close dialog and pass the new user data
+        },
+        error: (error) => {
+          console.error('Error creating user:', error);
+          this.loading = false;
+          const errorMessage = error.error?.message || 'Failed to create user.';
+          this.snackBar.open(errorMessage, 'Close', { duration: 3000 });
+        }
+      });
     }
   }
 

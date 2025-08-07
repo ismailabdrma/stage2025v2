@@ -8,9 +8,10 @@ import { MatInputModule } from "@angular/material/input"
 import { MatButtonModule } from "@angular/material/button"
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
 import { Store } from "@ngrx/store"
-import type { Observable } from "rxjs"
+import { Observable } from "rxjs"
 import { AuthActions } from "@core/store/auth/auth.actions"
-import { selectAuthLoading } from "@core/store/auth/auth.selectors"
+import { selectAuthLoading, selectAuthError, selectAuthMessage } from "@core/store/auth/auth.selectors"
+import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
 
 @Component({
   selector: "app-forgot-password",
@@ -24,13 +25,15 @@ import { selectAuthLoading } from "@core/store/auth/auth.selectors"
     MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: "./forgot-password.component.html",
   styleUrl: "./forgot-password.component.scss",
 })
-export class ForgotPasswordComponent {
+export class ForgotPasswordComponent implements OnInit {
   private fb = inject(FormBuilder)
   private store = inject(Store)
+  private snackBar = inject(MatSnackBar);
 
   forgotPasswordForm: FormGroup
   loading$: Observable<boolean> = this.store.select(selectAuthLoading)
@@ -39,6 +42,20 @@ export class ForgotPasswordComponent {
     this.forgotPasswordForm = this.fb.group({
       email: ["", [Validators.required, Validators.email]],
     })
+  }
+
+  ngOnInit(): void {
+    this.store.select(selectAuthError).subscribe(error => {
+      if (error) {
+        this.snackBar.open(error, 'Close', { duration: 5000 });
+      }
+    });
+
+    this.store.select(selectAuthMessage).subscribe(message => {
+      if (message) {
+        this.snackBar.open(message, 'Close', { duration: 5000 });
+      }
+    });
   }
 
   onSubmit(): void {

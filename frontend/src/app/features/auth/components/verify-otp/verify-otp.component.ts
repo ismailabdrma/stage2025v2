@@ -96,6 +96,7 @@ export class VerifyOtpComponent implements OnInit {
                     otp: this.otpForm.value.otp
                 }
             }));
+            // TODO: Implement intelligent redirection after successful OTP verification in NgRx effects
         }
     }
 }

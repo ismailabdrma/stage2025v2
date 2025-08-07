@@ -1,0 +1,171 @@
+<div class="checkout-container">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Checkout</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <mat-stepper [linear]="true" #stepper>
+            <mat-step [stepControl]="shippingForm" label="Shipping Information">
+              <form [formGroup]="shippingForm">
+                <h3>Select Shipping Address</h3>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Choose an Address</mat-label>
+                  <mat-select [(ngModel)]="selectedAddressId" formControlName="selectedAddress" (selectionChange)="onAddressSelect($event.value)">
+                    <mat-option *ngFor="let address of addresses" [value]="address.id">
+                      {{ address.label }} - {{ address.address }}, {{ address.city }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="shippingForm.get('selectedAddress')?.hasError('required')">
+                    Please select a shipping address
+                  </mat-error>
+                </mat-form-field>
+
+                <button mat-button color="accent" (click)="openAddressDialog()">
+                  <mat-icon>add</mat-icon>
+                  Add New Address
+                </button>
+
+                <div class="form-row" *ngIf="!selectedAddressId">
+                  <h3>Or Enter New Address</h3>
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>First Name</mat-label>
+                    <input matInput formControlName="firstName" required>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Last Name</mat-label>
+                    <input matInput formControlName="lastName" required>
+                  </mat-form-field>
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width" *ngIf="!selectedAddressId">
+                  <mat-label>Address</mat-label>
+                  <input matInput formControlName="address" required>
+                </mat-form-field>
+
+                <div class="form-row" *ngIf="!selectedAddressId">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>City</mat-label>
+                    <input matInput formControlName="city" required>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Postal Code</mat-label>
+                    <input matInput formControlName="postalCode" required>
+                  </mat-form-field>
+                </div>
+                 <mat-form-field appearance="outline" class="full-width" *ngIf="!selectedAddressId">
+                  <mat-label>Country</mat-label>
+                  <input matInput formControlName="country" required>
+                </mat-form-field>
+                 <mat-form-field appearance="outline" class="full-width" *ngIf="!selectedAddressId">
+                  <mat-label>Phone</mat-label>
+                  <input matInput formControlName="phone">
+                </mat-form-field>
+
+
+                <div class="step-actions">
+                  <button mat-raised-button color="primary" matStepperNext [disabled]="shippingForm.invalid && !selectedAddressId">Next</button>
+                </div>
+              </form>
+            </mat-step>
+
+            <mat-step [stepControl]="paymentForm" label="Payment Information">
+              <form [formGroup]="paymentForm">
+                <h3>Payment Method</h3>
+                <!--
+                  TODO: Integrate with a payment gateway like Stripe.
+                  This section should typically contain payment element components provided by the payment gateway SDK.
+                  The form fields below are placeholders and should be replaced or handled by the gateway's elements.
+                -->
+                <h4>Enter Card Details (Placeholder - Integrate Payment Gateway)</h4>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Card Number (Placeholder)</mat-label>
+                  <input matInput formControlName="cardNumber" placeholder="1234 5678 9012 3456" required>
+                </mat-form-field>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Expiry Date</mat-label>
+                    <input matInput formControlName="expiryDate" placeholder="MM/YY" required>
+ </mat-form-field>
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>CVV</mat-label>
+                    <input matInput formControlName="cvv" placeholder="123" required>
+ </mat-form-field>
+ </div>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Cardholder Name</mat-label>
+                  <input matInput formControlName="cardholderName" required>
+                </mat-form-field>
+
+
+                <div class="step-actions">
+                  <button mat-button matStepperPrevious>Back</button>
+                  <button mat-raised-button color="primary" matStepperNext [disabled]="paymentForm.invalid">Next</button>
+                </div>
+              </form>
+            </mat-step>
+
+            <mat-step label="Review Order">
+              <div class="order-summary">
+                <h3>Order Summary</h3>
+                 <div *ngIf="cart && cart.items && cart.items.length > 0">
+                  <div *ngFor="let item of cart.items" class="order-item">
+                    <span>{{ item.productName }} x {{ item.quantity }}</span>
+                    <span>${{ (item.unitPrice * item.quantity) | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="order-total">
+                    <strong>Total: ${{ getCartTotal() | number:'1.2-2' }}</strong>
+                  </div>
+                </div>
+
+                 <div class="shipping-address-review">
+                   <h3>Shipping To:</h3>
+                   <div *ngIf="selectedAddressId">
+                     <ng-container *ngIf="addresses.find(addr => addr.id === selectedAddressId) as selectedAddress">
+                       <p>
+                         {{ selectedAddress.firstName }} {{ selectedAddress.lastName }}<br>
+                         {{ selectedAddress.address }}<br>
+                         {{ selectedAddress.city }}, {{ selectedAddress.postalCode }}<br>
+                         {{ selectedAddress.country }}
+                       </p>
+                       <p *ngIf="selectedAddress.phone">
+                         <strong>Phone:</strong> {{ selectedAddress.phone }}
+                       </p>
+                     </ng-container>
+                   </div>
+                   <div *ngIf="!selectedAddressId && shippingForm.valid">
+                      <p>
+                         {{ shippingForm.value.firstName }} {{ shippingForm.value.lastName }}<br>
+                         {{ shippingForm.value.address }}<br>
+                         {{ shippingForm.value.city }}, {{ shippingForm.value.postalCode }}<br>
+                         {{ shippingForm.value.country }}
+                       </p>
+                        <p *ngIf="shippingForm.value.phone">
+                         <strong>Phone:</strong> {{ shippingForm.value.phone }}
+                       </p>
+                   </div>
+                   <div *ngIf="!selectedAddressId && shippingForm.invalid">
+                       <p>Shipping address not entered.</p>
+                   </div>
+                 </div>
+
+
+                <div class="step-actions">
+                  <button mat-button matStepperPrevious>Back</button>
+ <button mat-raised-button color="primary" (click)="placeOrder()" [disabled]="placingOrder">
+ <mat-spinner diameter="20" *ngIf="placingOrder"></mat-spinner>
+ <span *ngIf="!placingOrder">Place Order</span>
+ </button>
+                </div>
+
+                  </button>
+                </div>
+              </div>
+            </mat-step>
+          </mat-stepper>
+        </mat-card-content>
+      </mat-card>
+    </div>

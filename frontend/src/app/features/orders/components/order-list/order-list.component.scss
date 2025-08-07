@@ -1,0 +1,61 @@
+/* Order List Styles */
+@import '../../../../shared/styles/utilities.scss';
+
+.order-list-container {
+}
+
+.orders-table {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.orders-table th.mat-header-cell {
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.orders-table mat-cell {
+    padding: 8px 16px;
+}
+
+@media (max-width: 768px) {
+    .order-list-container {
+        padding: 15px;
+    }
+
+    .orders-table {
+        /* Hide headers on smaller screens */
+        .mat-header-cell {
+            display: none;
+        }
+
+        /* Display cells as blocks */
+        .mat-cell {
+            display: block;
+            border-bottom: none;
+            padding: 8px 0; /* Adjust padding */
+        }
+
+        /* Add labels before cell content */
+        .mat-cell::before {
+            content: attr(data-label); /* Use a data-label attribute in HTML */
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+         /* Style actions column */
+         .mat-column-actions {
+            text-align: center; /* Center actions */
+            padding: 16px 0; /* Add padding above/below actions */
+         }
+
+         /* Add borders between rows */
+         .mat-row {
+             flex-direction: column;
+             align-items: flex-start;
+             padding: 16px;
+             border-bottom: 1px solid #ddd;
+         }
+    }
+}

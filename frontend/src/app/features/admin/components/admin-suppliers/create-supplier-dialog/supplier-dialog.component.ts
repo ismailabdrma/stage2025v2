@@ -7,6 +7,7 @@ import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { SupplierService } from "@core/services/supplier.service";
 import { HttpClient, HttpClientModule } from "@angular/common/http";
 
@@ -87,6 +88,7 @@ export class CreateSupplierDialogComponent {
     private dialogRef = inject(MatDialogRef<CreateSupplierDialogComponent>);
     private supplierService = inject(SupplierService);
     private http = inject(HttpClient);
+ private snackBar = inject(MatSnackBar);
 
     constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
         this.supplierForm = this.fb.group({
@@ -130,11 +132,25 @@ export class CreateSupplierDialogComponent {
         const supplier = this.supplierForm.value;
         if (this.data) {
             this.supplierService.updateSupplier(this.data.id, supplier).subscribe(() => {
+ this.snackBar.open('Supplier updated successfully!', 'Close', {
+ duration: 3000,
+ });
                 this.dialogRef.close(true);
+ }, error => {
+ console.error('Error updating supplier:', error);
+ this.snackBar.open('Failed to update supplier.', 'Close', {
+ duration: 3000,
+ });
             });
         } else {
             this.supplierService.createSupplier(supplier).subscribe(() => {
+ this.snackBar.open('Supplier created successfully!', 'Close', {
+ duration: 3000,
+ });
                 this.dialogRef.close(true);
+ }, error => {
+ console.error('Error creating supplier:', error);
+ this.snackBar.open('Failed to create supplier.', 'Close', { duration: 3000 });
             });
         }
     }

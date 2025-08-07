@@ -1,0 +1,40 @@
+scss
+/* Admin User Create Dialog Styles */
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.half-width {
+  flex: 1;
+  margin-bottom: 16px;
+}
+
+mat-dialog-content {
+  min-width: 400px;
+  padding-bottom: 0; /* Adjust as needed */
+}
+
+mat-dialog-actions {
+  padding: 16px 24px; /* Adjust as needed */
+}
+
+mat-spinner {
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+  }
+
+  mat-dialog-content {
+    min-width: 300px;
+  }
+}
