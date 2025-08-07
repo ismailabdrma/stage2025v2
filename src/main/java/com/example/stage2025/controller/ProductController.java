@@ -9,8 +9,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/products")
@@ -22,24 +28,30 @@ public class ProductController {
 
     /**
      * Get all products, or filter by category and/or supplier (as query params).
-     * Ex: /api/products?category=Smartphones&supplier=Samsung
+     * Ex: /api/products?category=Smartphones&supplier=Samsung&search=iphone&sortBy=price,desc&page=0&size=10&includeInactive=true
      */
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAll(
             @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "supplier", required = false) String supplier
+            @RequestParam(value = "supplier", required = false) String supplier,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "name,asc") String sortBy,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(value = "includeInactive", required = false, defaultValue = "false") boolean includeInactive
     ) {
-        List<ProductDto> products;
-
-        if (category != null && supplier != null) {
-            products = productService.getProductsByCategoryAndSupplier(category, supplier);
-        } else if (category != null) {
-            products = productService.getProductsByCategoryName(category);
-        } else if (supplier != null) {
-            products = productService.getProductsBySupplierName(supplier);
+        Sort sort = Sort.by(sortBy.split(",")[0]);
+        if (sortBy.split(",").length > 1 && sortBy.split(",")[1].equalsIgnoreCase("desc")) {
+            sort = sort.descending();
         } else {
-            products = productService.getAllProducts();
+            sort = sort.ascending();
         }
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Product> productPage = productService.getAllProducts(category, supplier, search, includeInactive, pageable);
+        List<ProductDto> products = productPage.getContent().stream()
+                .map(ProductMapper::toDto)
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(products);
     }
@@ -77,7 +89,7 @@ public class ProductController {
         return ResponseEntity.ok(dtos);
     }
 
-    // --- Admin: Activate/validate product ---
+    // --- Admin: Activate product ---
     @PutMapping("/{id}/activate")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> activateProduct(@PathVariable Long id) {
@@ -86,5 +98,30 @@ public class ProductController {
         product.setActive(true);
         productRepository.save(product);
         return ResponseEntity.ok("Product activated");
+    }
+
+    // --- Admin: Deactivate product ---
+    @PutMapping("/{id}/deactivate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deactivateProduct(@PathVariable Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setActive(false);
+        productRepository.save(product);
+        return ResponseEntity.ok("Product deactivated");
+    }
+
+    // --- Public: Get featured products ---
+    @GetMapping("/featured")
+    public ResponseEntity<List<ProductDto>> getFeaturedProducts() {
+        List<ProductDto> products = productService.getFeaturedProducts();
+        return ResponseEntity.ok(products);
+    }
+
+    // --- Public: Get suggested products ---
+    @GetMapping("/{id}/suggested")
+    public ResponseEntity<List<ProductDto>> getSuggestedProducts(@PathVariable Long id) {
+        List<ProductDto> products = productService.getSuggestedProducts(id);
+        return ResponseEntity.ok(products);
     }
 }

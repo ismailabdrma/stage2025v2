@@ -1,6 +1,8 @@
 package com.example.stage2025.controller;
 
 import com.example.stage2025.dto.UserDto;
+import com.example.stage2025.entity.Admin;
+import com.example.stage2025.entity.Client;
 import com.example.stage2025.entity.User;
 import com.example.stage2025.enums.Role;
 import com.example.stage2025.mapper.UserMapper;
@@ -125,7 +127,31 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    /** New: Create user (ADMIN ONLY) */
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody CreateUserRequest req) {
+        if (userRepository.existsByUsernameOrEmail(req.username(), req.email())) {
+            return ResponseEntity.badRequest().build(); // Or a more specific error
+        }
+
+        User newUser = (req.role() == Role.ADMIN) ? new Admin() : new Client();
+        newUser.setUsername(req.username());
+        newUser.setEmail(req.email());
+        newUser.setPassword(passwordEncoder.encode(req.password()));
+        newUser.setFirstName(req.firstName());
+        newUser.setLastName(req.lastName());
+        newUser.setPhone(req.phone());
+        newUser.setRole(req.role());
+        newUser.setActive(true); // Admin created users are active by default
+
+        userRepository.save(newUser);
+        return ResponseEntity.ok(UserMapper.toDto(newUser));
+    }
+
+
     // DTOs
     public record UpdateProfileRequest(String firstName, String lastName, String phone) {}
     public record ChangePasswordRequest(String newPassword) {}
+    public record CreateUserRequest(String username, String email, String password, String firstName, String lastName, String phone, Role role) {}
 }
